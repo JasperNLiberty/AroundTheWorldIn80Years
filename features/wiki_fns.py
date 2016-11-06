@@ -1,6 +1,8 @@
 import requests
 import json
 import re
+from apiclient.discovery import build
+
 
 def wiki_extract(select_topic):
     try:
@@ -36,3 +38,32 @@ def wiki_search(search_term):
             break
 
     return wiki_extract(exact_title)
+
+
+def save_images(search_term, num_images):
+    service = build("customsearch", "v1",
+               developerKey="AIzaSyDHprXaJe8U1CpF7kYH6IWUktAViHhiWnc")
+    res = service.cse().list(
+        q=search_term,
+        cx='004441307141111453178:v-kf4bu7lsy',
+        num=num_images,
+        safe='high',
+    ).execute()
+
+    good_image_num = 0
+    for seq in range(num_images):
+        try:
+            image_url = res['items'][seq]['pagemap']['cse_image'][0]['src']
+            good_image_num += 1
+        except:
+            try:
+                image_url = res['items'][seq]['pagemap']['imageobject'][0]['contenturl']
+                good_image_num += 1
+            except:
+                continue
+
+        response = requests.get(image_url)
+        image_name = search_term + str(seq)
+        with open('./Images/'+image_name, 'w') as f:
+            f.write(response.content)
+    return good_image_num
