@@ -54,16 +54,17 @@ def save_images(search_term, num_images):
     for seq in range(num_images):
         try:
             image_url = res['items'][seq]['pagemap']['cse_image'][0]['src']
-            good_image_num += 1
         except:
             try:
                 image_url = res['items'][seq]['pagemap']['imageobject'][0]['contenturl']
-                good_image_num += 1
             except:
                 continue
+        
+        try:
+            response = requests.get(image_url)
+            image_name = search_term + str(seq)
+            with open('./Images/'+image_name, 'w') as f:
+                f.write(response.content)
+            good_image_num += 1
 
-        response = requests.get(image_url)
-        image_name = search_term + str(seq)
-        with open('./Images/'+image_name, 'w') as f:
-            f.write(response.content)
     return good_image_num
